@@ -1,8 +1,8 @@
 ## Project-0
 
-In this project, you will implement a few features to become familar with the environment and the system that you will work with for the rest of the course. 
+In this project, you will implement a few features to become familar with the environment and the system that you will work with for the rest of the course.
 
-You will use the JOS operating system running on QEMU for this project. Check the [tools page](https://github.com/vijay03/cs360v-f20/blob/master/tools.md) for an overview on JOS and useful commands of QEMU. You will work on them over the next 3 or 4 lab assignments and at the end, you will launch a JOS-in-JOS environment. 
+You will use the JOS operating system running on QEMU for this project. Check the [tools page](https://github.com/vijay03/cs360v-f20/blob/master/tools.md) for an overview on JOS and useful commands of QEMU. You will work on them over the next 3 or 4 lab assignments and at the end, you will launch a JOS-in-JOS environment.
 
 ### Background
 
@@ -16,7 +16,7 @@ The README series is broken down into 4 parts:
 
 ## Lab-0
 
-For Lab-0, you will first set up your working environment and then implement code to demonstrate understanding of the codebase. 
+For Lab-0, you will first set up your working environment and then implement code to demonstrate understanding of the codebase.
 
 
 ## 1. Getting Started
@@ -51,9 +51,9 @@ $ qemu-system-x86_64 -cpu host -drive file=<path-to-qcow2-image>,format=qcow2 -m
 $ ssh -p <port-id> cs378@localhost
 ```
 
-If you see an error that says something similar to `Could not set up host forwarding rule 'tcp::5905-:22'`, there may be some other program that is listening to the same port as yours. 
+If you see an error that says something similar to `Could not set up host forwarding rule 'tcp::5905-:22'`, there may be some other program that is listening to the same port as yours.
 
-To figure out if this is the case, 
+To figure out if this is the case,
 `lsof -i:5905` or `nc -l -p  5905` will tell you if something is running on that port.
 
 
@@ -88,33 +88,33 @@ You can run the vmm from the shell by typing:
 $ make run-vmm-nox
 ```
 
-## 2. Coding Assignment 
+## 2. Coding Assignment
 
-### Tracing code with GDB and pointer arithmetic review 
+### Tracing code with GDB and pointer arithmetic review
 
-To begin, we'd like you to get familar with using GDB. GDB is a great tool for debugging system level programs because it gives you the ability to see what is happening at a low level. 
+To begin, we'd like you to get familar with using GDB. GDB is a great tool for debugging system level programs because it gives you the ability to see what is happening at a low level.
 
 First, set up GDB for the JOS computers using the guide founds in the [tools page](https://github.com/vijay03/cs360v-f20/blob/master/tools.md). Additionally, here is a reference sheet for [GDB commands](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
 
-In order to run JOS in GDB, run 
+In order to run JOS in GDB, run
 
 ```
-gdb .\ yadda yadda 
-r - args 
+gdb .\ yadda yadda
+r - args
 ```
 
 First, place a breakpoint at `env_pop_tf(struct Trapframe *tf)` in `kern/env.c`
 This function restores the register values in the Trapframe with the 'iret' instruction.
 An IRET instruction returns from the OS to the application program which made the system call. The IRET also makes a change back to User Mode.
 
-Observe the register values, and note them down. 
+Observe the register values, and note them down.
 
-Which register contains the return value? What is the value you see? Is this an address or a constant value? 
-Which register contains the next assembly instruction to execute? What is the value you see? Is this an address or a constant value? 
+Which register contains the return value? What is the value you see? Is this an address or a constant value?
+Which register contains the next assembly instruction to execute? What is the value you see? Is this an address or a constant value?
 
-Using the answer from the previous question, what are the next 5 instructions that will be executed? What are the hex codes of those functions? 
+Using the answer from the previous question, what are the next 5 instructions that will be executed? What are the hex codes of those functions?
 
-As you may notice, the function calls a c function `__asm __volatile()`. The asm statement allows you to include assembly instructions directly within C code. The `volatile` keyword simply tells the assembler not to optimize this instruction away. 
+As you may notice, the function calls a c function `__asm __volatile()`. The asm statement allows you to include assembly instructions directly within C code. The `volatile` keyword simply tells the assembler not to optimize this instruction away.
 
 Using the register values you observed, list what the changed registers will look like after the instructions execute. Note what the difference is between the different move instructions.
 
@@ -125,35 +125,35 @@ addq $16, %rsp
 addq $16, %rsp
 ```
 
-You can check your work using the `stepi` functionality in GDB, which will execute one instruction at a time. 
+You can check your work using the `stepi` functionality in GDB, which will execute one instruction at a time.
 
 Now, if I were to call this instruction:
 ```
 movq $0, (%rsp)
 ```
-Why might this throw an error? 
+Why might this throw an error?
 
 
 ### Track number of runs for an env
 
 In JOS the terms "environment" and "process" are interchangeable - they roughly have the same meaning. We introduce the term "environment" instead of the traditional term "process" in order to stress the point that JOS environments do not provide the same semantics as UNIX processes, even though they are roughly comparable.
 
-[This guide](https://github.com/vijay03/cs360v-f21/blob/master/environments.md), linked at the beginning of the project, provides an in depth introduction into environments. 
+[This guide](https://github.com/vijay03/cs360v-f21/blob/master/environments.md), linked at the beginning of the project, provides an in depth introduction into environments.
 
 In this part of the project, we want to be able to keep track of number of times environment has run, as an important piece of metadata.
 
-Add a new field to the struct declaration of `Env` called `env_runs` in order to track this information. 
+Add a new field to the struct declaration of `Env` called `env_runs` in order to track this information.
 
 ### Fix implementation of envid2env() in inc/env.c
 
-Throughout these Labs in project_1, you will have to use a helper function, envid2env, to retrieve the Env struct, that contains metadata about an environment. 
+Throughout these Labs in project_1, you will have to use a helper function, envid2env, to retrieve the Env struct, that contains metadata about an environment.
 
-Right now, this function has a few bugs in it. 
+Right now, this function has a few bugs in it.
 1. If envid is zero, the function should return the current environment.
-2. It incorrectly looks up the env in the envs array. 
-3. It incorrectly fills the **env_store with the correct env reference. 
+2. It incorrectly looks up the env in the envs array.
+3. It incorrectly fills the **env_store with the correct env reference.
 
-Using env macros and information in inc/env.h and your knowledge of C references, fix these three bugs. 
+Using env macros and information in inc/env.h and your knowledge of C references, fix these three bugs.
 
 ## Hints
 
